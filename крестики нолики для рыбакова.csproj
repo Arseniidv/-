@@ -1,0 +1,90 @@
+﻿using System;
+
+class TicTacToe
+{
+    static char[] board = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    static char currentPlayer = 'X';
+    static int moveCount = 0;
+
+    static void Main()
+    {
+        bool gameOver = false;
+
+        while (!gameOver)
+        {
+            Console.Clear();
+            PrintBoard();
+
+            Console.WriteLine($"Ход игрока {currentPlayer}. Введите номер клетки (1-9):");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out int position) && position >= 1 && position <= 9)
+            {
+                int index = position - 1;
+
+                if (board[index] != 'X' && board[index] != 'O')
+                {
+                    board[index] = currentPlayer;
+                    moveCount++;
+
+                    if (CheckWin(currentPlayer))
+                    {
+                        Console.Clear();
+                        PrintBoard();
+                        Console.WriteLine($"Игрок {currentPlayer} победил!");
+                        gameOver = true;
+                    }
+                    else if (moveCount == 9)
+                    {
+                        Console.Clear();
+                        PrintBoard();
+                        Console.WriteLine("Ничья!");
+                        gameOver = true;
+                    }
+                    else
+                    {
+                        currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Эта клетка уже занята! Нажмите Enter для продолжения...");
+                    Console.ReadLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Некорректный ввод! Нажмите Enter для продолжения...");
+                Console.ReadLine();
+            }
+        }
+    }
+
+    static void PrintBoard()
+    {
+        Console.WriteLine(" " + board[0] + " | " + board[1] + " | " + board[2]);
+        Console.WriteLine("-----------");
+        Console.WriteLine(" " + board[3] + " | " + board[4] + " | " + board[5]);
+        Console.WriteLine("-----------");
+        Console.WriteLine(" " + board[6] + " | " + board[7] + " | " + board[8]);
+    }
+
+    static bool CheckWin(char player)
+    {
+        // Проверка горизонталей
+        if (board[0] == player && board[1] == player && board[2] == player) return true;
+        if (board[3] == player && board[4] == player && board[5] == player) return true;
+        if (board[6] == player && board[7] == player && board[8] == player) return true;
+
+        // Проверка вертикалей
+        if (board[0] == player && board[3] == player && board[6] == player) return true;
+        if (board[1] == player && board[4] == player && board[7] == player) return true;
+        if (board[2] == player && board[5] == player && board[8] == player) return true;
+
+        // Проверка диагоналей
+        if (board[0] == player && board[4] == player && board[8] == player) return true;
+        if (board[2] == player && board[4] == player && board[6] == player) return true;
+
+        return false;
+    }
+}
