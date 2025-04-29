@@ -1,0 +1,150 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace TextNovel
+{
+    public class GameStep
+    {
+        public string Text { get; }
+        public Dictionary<int, GameStep> Choices { get; }
+        public bool IsEnding { get; }
+
+        public GameStep(string text, bool isEnding = false)
+        {
+            Text = text;
+            Choices = new Dictionary<int, GameStep>();
+            IsEnding = isEnding;
+        }
+
+        public void AddChoice(int number, GameStep nextStep)
+        {
+            Choices[number] = nextStep;
+        }
+    }
+
+    class Program
+    {
+        static Dictionary<string, GameStep> InitializeStory()
+        {
+            var steps = new Dictionary<string, GameStep>();
+
+            // Создание всех шагов и концовок
+            steps.Add("start", new GameStep(
+                "Вы стоите на краю древнего леса. Перед вами три тропы:\n" +
+                "1. Идти по освещённой солнцем дороге\n" +
+                "2. Свернуть на заросшую тропинку\n" +
+                "3. Пробираться через чащу"));
+
+            steps.Add("step1", new GameStep(
+                "На дороге вы находите странный медальон с гравировкой волка.\n" +
+                "1. Взять медальон\n" +
+                "2. Пройти мимо"));
+
+            steps.Add("step2", new GameStep(
+                "Тропинка приводит к заброшенной хижине. Из трубы идёт дым.\n" +
+                "1. Постучать в дверь\n" +
+                "2. Осмотреть окрестности"));
+
+            steps.Add("step3", new GameStep(
+                "В чаще вы натыкаетесь на раненого медведя!\n" +
+                "1. Попытаться помочь\n" +
+                "2. Медленно отступить"));
+
+            // Добавляем остальные шаги
+            steps.Add("step4", new GameStep(
+                "Медальон начинает светиться. Вы слышите вой вдалеке.\n" +
+                "1. Идти на звук\n" +
+                "2. Спрятаться за камнями"));
+
+            steps.Add("step5", new GameStep(
+                "Дверь открывает старик с глазами разного цвета.\n" +
+                "1. Спросить о медальоне\n" +
+                "2. Атаковать"));
+
+            steps.Add("step6", new GameStep(
+                "Медведь принимает вас за угрозу! Ваши действия:\n" +
+                "1. Бросить еду\n" +
+                "2. Использовать оружие"));
+
+            steps.Add("step7", new GameStep(
+                "Вы находите древний алтарь с тремя чашами.\n" +
+                "1. Нальить воду в левую чашу\n" +
+                "2. Нальить воду в правую чашу\n" +
+                "3. Разбить алтарь"));
+
+            // Концовки
+            steps.Add("end1", new GameStep("Вы становтесь вождём племени оборотней!", true));
+            steps.Add("end2", new GameStep("Каменная ловушка похоронила вас навеки", true));
+            steps.Add("end3", new GameStep("Вы обрели бессмертие, но потеряли человечность", true));
+            steps.Add("end4", new GameStep("Медведь становится вашим верным другом", true));
+            steps.Add("end5", new GameStep("Вы превращаетесь в дерево - хранителя леса", true));
+
+            // Связываем шаги
+            steps["start"].AddChoice(1, steps["step1"]);
+            steps["start"].AddChoice(2, steps["step2"]);
+            steps["start"].AddChoice(3, steps["step3"]);
+
+            steps["step1"].AddChoice(1, steps["step4"]);
+            steps["step1"].AddChoice(2, steps["step7"]);
+
+            steps["step2"].AddChoice(1, steps["step5"]);
+            steps["step2"].AddChoice(2, steps["step7"]);
+
+            steps["step3"].AddChoice(1, steps["step6"]);
+            steps["step3"].AddChoice(2, steps["end5"]);
+
+            steps["step4"].AddChoice(1, steps["end1"]);
+            steps["step4"].AddChoice(2, steps["end2"]);
+
+            steps["step5"].AddChoice(1, steps["end3"]);
+            steps["step5"].AddChoice(2, steps["end2"]);
+
+            steps["step6"].AddChoice(1, steps["end4"]);
+            steps["step7"].AddChoice(1, steps["end3"]);
+            steps["step7"].AddChoice(2, steps["end1"]);
+            steps["step7"].AddChoice(3, steps["end5"]);
+
+            return steps;
+        }
+
+        static void Main(string[] args)
+        {
+            var story = InitializeStory();
+            GameStep currentStep = story["start"];
+
+            Console.WriteLine("======== ТАЙНА ЛЕСА ОБОРОТНЕЙ ========\n");
+
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(new string('═', 50));
+                Console.ResetColor();
+                Console.WriteLine(currentStep.Text);
+
+                if (currentStep.IsEnding)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\n■■■ КОНЕЦ ИСТОРИИ ■■■");
+                    Console.ResetColor();
+                    break;
+                }
+
+                int choice;
+                bool isValid;
+                do
+                {
+                    Console.Write("\nВаш выбор (цифра): ");
+                    isValid = int.TryParse(Console.ReadLine(), out choice) &&
+                             currentStep.Choices.ContainsKey(choice);
+
+                    if (!isValid) Console.WriteLine("Неверный выбор! Попробуйте снова.");
+                } while (!isValid);
+
+                currentStep = currentStep.Choices[choice];
+            }
+
+            Console.WriteLine("\nНажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+    }
+}
